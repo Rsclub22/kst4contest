@@ -51,7 +51,7 @@ DF7NX;unknown;unknown;StringProperty [value: null];true;false;true;false;false;f
 DL3LAR;unknown;unknown;StringProperty [value: null];true;false;true;false;false;false;false;false
 DG3AWN;unknown;unknown;StringProperty [value: null];true;true;false;false;false;false;false;false
 DK2TN;unknown;unknown;StringProperty [value: null];true;true;false;false;false;false;false;false
-DN5PW;unknown;unknown;StringProperty [value: null];true;false;true;false;false;false;false;false
+DN5PW;Philip;unknown;StringProperty [value: null];true;false;true;false;false;false;false;false
 DL1YDI;Dirk 2m/9Ele;JO42FA;StringProperty [value: null];true;true;false;false;false;false;false;false
 DK2WC;unknown;unknown;StringProperty [value: null];true;true;false;false;false;false;false;false
 DJ3QB;unknown;unknown;StringProperty [value: null];true;true;false;false;false;false;false;false
