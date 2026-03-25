@@ -10,7 +10,7 @@ Entwickelt von **DO5AMF (Marc Fröhlich)**, Operator bei DM5M.
 
 | 🇩🇪 Deutsch | 🇬🇧 English |
 |---|---|
-| [Startseite (Deutsch)](de-Home) | [Home (English)](en-Home) |
+| [Startseite (Deutsch)](de-Home) | [Home (English)](en-Home) |o
 
 ---
 
@@ -51,3 +51,5 @@ Entwickelt von **DO5AMF (Marc Fröhlich)**, Operator bei DM5M.
 - **Download**: https://do5amf.funkerportal.de/
 - **GitHub**: https://github.com/praktimarc/kst4contest
 - **Kontakt / Contact**: praktimarc+kst4contest@gmail.com
+
+![image](Bildschirmfoto_20260325_212539.png)
