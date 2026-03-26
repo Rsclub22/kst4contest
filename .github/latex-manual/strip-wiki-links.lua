@@ -1,9 +1,11 @@
 --[[
   strip-wiki-links.lua – pandoc Lua filter for KST4Contest documentation
   -----------------------------------------------------------------------
-  1. Converts internal GitHub-wiki-style links (no http/https prefix) to
+  1. Removes language-switch blockquotes (GitHub Wiki navigation) that
+     are not relevant in the printed PDF manual.
+  2. Converts internal GitHub-wiki-style links (no http/https prefix) to
      plain text, keeping the display label.
-  2. Replaces flag emoji and other symbols that XeLaTeX cannot render with
+  3. Replaces flag emoji and other symbols that XeLaTeX cannot render with
      plain-text equivalents.
 --]]
 
@@ -28,6 +30,18 @@ local function replace_emoji(text)
     text = text:gsub(pattern, replacement)
   end
   return text
+end
+
+--- Filter: remove language-switch blockquotes from PDF output.
+-- These blockquotes appear in every wiki page for GitHub navigation
+-- but are not needed in the printed manual.
+function BlockQuote(el)
+  local text = pandoc.utils.stringify(el)
+  if text:find("Du liest gerade die deutsche Version") or
+     text:find("You are reading the English version") then
+    return {}
+  end
+  return el
 end
 
 --- Filter: convert internal wiki links to their display text.

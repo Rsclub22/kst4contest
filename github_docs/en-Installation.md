@@ -78,9 +78,7 @@ KST4Contest includes an **automatic update notification service**: as soon as a 
 
 ![Example Update Window](update_window.png)
 
-### Update Process
-
-#### Windows
+### Windows
 
 Currently, there is only one way to update:
 
@@ -89,7 +87,7 @@ Currently, there is only one way to update:
 
 The settings file (`preferences.xml`) is preserved because it is stored in the user folder, not the program folder.
 
-#### Linux
+### Linux
 
 Currently as follows:
 1. Download the new AppImage

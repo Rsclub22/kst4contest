@@ -78,9 +78,7 @@ KST4Contest enthält einen **automatischen Update-Hinweis-Dienst**: Sobald eine 
 
 ![Beispiel Update Fenster](update_window.png)
 
-### Update-Prozess
-
-#### Windows
+### Windows
 
 Derzeit gibt es nur einen Weg zum Aktualisieren:
 
@@ -89,7 +87,7 @@ Derzeit gibt es nur einen Weg zum Aktualisieren:
 
 Die Einstellungsdatei (`preferences.xml`) bleibt erhalten, da sie im Benutzerordner gespeichert ist – nicht im Programmordner.
 
-#### Linux
+### Linux
 
 Derzeit folgendermaßen:
 1. neues AppImage herunterladen
