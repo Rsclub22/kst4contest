@@ -61,6 +61,7 @@ $endif$
 \usepackage{longtable}
 \usepackage{booktabs}
 \usepackage{array}
+\usepackage{calc}
 \usepackage{multirow}
 \setlength{\tabcolsep}{8pt}
 \renewcommand{\arraystretch}{1.35}
@@ -73,7 +74,7 @@ $endif$
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{2pt}\setlength{\parskip}{0pt}}
 
-%% ─── Code blocks (--listings flag) ───────────────────────────────────────
+%% ─── Code blocks (--listings flag) ───────────────────────────────────
 \usepackage{listings}
 \lstset{
   basicstyle       = \ttfamily\small,
@@ -89,6 +90,9 @@ $endif$
   xrightmargin     = 6pt,
   aboveskip        = 8pt,
   belowskip        = 8pt,
+  literate         = {→}{{\ensuremath{\rightarrow}}}1
+                     {←}{{\ensuremath{\leftarrow}}}1
+                     {↔}{{\ensuremath{\leftrightarrow}}}1,
 }
 
 %% ─── Blockquotes ──────────────────────────────────────────────────────────
@@ -170,6 +174,8 @@ $endif$
 %% ─── Misc ─────────────────────────────────────────────────────────────────
 \usepackage{amsmath}
 \usepackage{microtype}
+% Pandoc helper macros
+\newcommand{\passthrough}[1]{#1}
 
 %% ══════════════════════════════════════════════════════════════════════════
 \begin{document}
