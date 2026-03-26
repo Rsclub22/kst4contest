@@ -1,5 +1,5 @@
 %% ============================================================
-%%  PraktiKST / KST4Contest – pandoc LaTeX manual template
+%%  KST4Contest – pandoc LaTeX manual template
 %%  PDF engine: XeLaTeX
 %%  Usage: pandoc --template=manual-template.tex --pdf-engine=xelatex
 %% ============================================================
@@ -23,11 +23,11 @@ $endif$
 
 %% ─── Colors ───────────────────────────────────────────────────────────────
 \usepackage[dvipsnames,svgnames,x11names]{xcolor}
-\definecolor{brand-blue}{RGB}{30,60,120}
+\definecolor{brand-green}{RGB}{7,166,54}
 \definecolor{link-blue}{RGB}{0,86,163}
 \definecolor{code-bg}{RGB}{245,247,250}
 \definecolor{code-border}{RGB}{180,200,225}
-\definecolor{blockquote-line}{RGB}{30,60,120}
+\definecolor{blockquote-line}{RGB}{7,166,54}
 
 %% ─── Hyperlinks ───────────────────────────────────────────────────────────
 \usepackage{hyperref}
@@ -39,8 +39,8 @@ $endif$
   citecolor   = link-blue,
   pdftitle    = {$title$},
   pdfauthor   = {DO5AMF (Marc Fröhlich)},
-  pdfsubject  = {KST4Contest / PraktiKST User Manual},
-  pdfkeywords = {KST4Contest, PraktiKST, VHF, Contest, Ham Radio},
+  pdfsubject  = {KST4Contest User Manual},
+  pdfkeywords = {KST4Contest, pratiKST, VHF, Contest, Ham Radio},
   bookmarks            = true,
   bookmarksnumbered    = true,
   bookmarksopen        = true,
@@ -123,15 +123,15 @@ $endif$
 \usepackage{titlesec}
 
 \titleformat{\section}
-  {\Large\bfseries\color{brand-blue}}
+  {\Large\bfseries\color{brand-green}}
   {}
   {0em}
   {}
-  [\color{brand-blue}\titlerule]
+  [\color{brand-green}\titlerule]
 \titlespacing{\section}{0pt}{20pt}{10pt}
 
 \titleformat{\subsection}
-  {\large\bfseries\color{brand-blue}}
+  {\large\bfseries\color{brand-green}}
   {}
   {0em}
   {}
@@ -148,14 +148,14 @@ $endif$
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small\color{brand-blue}\textbf{PraktiKST · KST4Contest}}
-\fancyhead[R]{\small\color{brand-blue}$if(version)$$version$$endif$}
+\fancyhead[L]{\small\color{brand-green}\textbf{KST4Contest}}
+\fancyhead[R]{\small\color{brand-green}$if(version)$$version$$endif$}
 \fancyfoot[L]{\small\color{gray}DO5AMF (Marc Fröhlich)}
 \fancyfoot[C]{\small\color{gray}\thepage}
 \fancyfoot[R]{\small\color{gray}$title$}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.3pt}
-\renewcommand{\headrule}{\color{brand-blue}\hrule width\headwidth height\headrulewidth}
+\renewcommand{\headrule}{\color{brand-green}\hrule width\headwidth height\headrulewidth}
 
 %% ─── Paragraph spacing ────────────────────────────────────────────────────
 \usepackage{parskip}
@@ -164,11 +164,11 @@ $endif$
 
 %% ─── TOC styling ──────────────────────────────────────────────────────────
 \usepackage{tocloft}
-\renewcommand{\cfttoctitlefont}{\Large\bfseries\color{brand-blue}}
-\renewcommand{\cftsecfont}{\bfseries\color{brand-blue}}
-\renewcommand{\cftsecpagefont}{\bfseries\color{brand-blue}}
-\renewcommand{\cftsubsecfont}{\color{brand-blue}}
-\renewcommand{\cftsubsecpagefont}{\color{brand-blue}}
+\renewcommand{\cfttoctitlefont}{\Large\bfseries\color{brand-green}}
+\renewcommand{\cftsecfont}{\bfseries\color{brand-green}}
+\renewcommand{\cftsecpagefont}{\bfseries\color{brand-green}}
+\renewcommand{\cftsubsecfont}{\color{brand-green}}
+\renewcommand{\cftsubsecpagefont}{\color{brand-green}}
 \setlength{\cftbeforesecskip}{4pt}
 
 %% ─── Misc ─────────────────────────────────────────────────────────────────
@@ -182,17 +182,17 @@ $endif$
 
 %% ─── Title page ───────────────────────────────────────────────────────────
 \begin{titlepage}
-  \pagecolor{brand-blue}
+  \pagecolor{brand-green}
   \centering
   \vspace*{3.5cm}
-  {\fontsize{52}{62}\selectfont\bfseries\color{white}PraktiKST}\\[0.4cm]
-  {\fontsize{22}{28}\selectfont\color{white!75!brand-blue}KST4Contest}\\[2.8cm]
-  \color{white!40!brand-blue}\rule{10cm}{0.6pt}\\[1.8cm]
+  {\fontsize{52}{62}\selectfont\bfseries\color{white}KST4Contest}\\[0.4cm]
+  {\fontsize{22}{28}\selectfont\color{white!75!brand-green}pratiKST (ON4KST Chat Client)}\\[2.8cm]
+  \color{white!40!brand-green}\rule{10cm}{0.6pt}\\[1.8cm]
   {\LARGE\bfseries\color{white}$title$}\\[1cm]
-  $if(version)${\large\color{white!80!brand-blue}Version:\space$version$}\\[0.6cm]$endif$
+  $if(version)${\large\color{white!80!brand-green}Version:\space$version$}\\[0.6cm]$endif$
   \vfill
   {\large\color{white}DO5AMF · Marc Fröhlich · DM5M}\\[0.4cm]
-  {\color{white!70!brand-blue}\today}\\[2cm]
+  {\color{white!70!brand-green}\today}\\[2cm]
 \end{titlepage}
 
 \pagecolor{white}
