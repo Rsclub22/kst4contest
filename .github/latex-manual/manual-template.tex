@@ -144,6 +144,22 @@ $endif$
   {}
 \titlespacing{\subsubsection}{0pt}{10pt}{4pt}
 
+% Level 4 (####): displayed as a named block heading in dark-grey
+\titleformat{\paragraph}
+  {\normalsize\bfseries\color{black!70}}
+  {}
+  {0em}
+  {}
+\titlespacing{\paragraph}{0pt}{8pt}{2pt}
+
+% Level 5 (#####): slightly smaller, italic, lighter grey
+\titleformat{\subparagraph}
+  {\small\bfseries\itshape\color{black!55}}
+  {}
+  {0em}
+  {}
+\titlespacing{\subparagraph}{0pt}{6pt}{1pt}
+
 %% ─── Header / Footer ──────────────────────────────────────────────────────
 \usepackage{fancyhdr}
 \pagestyle{fancy}
