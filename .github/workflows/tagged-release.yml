@@ -76,11 +76,6 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Install Linux packaging dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends rpm zstd
-
       - name: Ensure mvnw is executable
         run: chmod +x mvnw
 
@@ -101,40 +96,6 @@ jobs:
             --module-path target/dist-libs \
             --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.web,javafx.media,java.sql \
             --dest dist
-
-      - name: Build Debian package
-        run: |
-          jpackage \
-            --type deb \
-            --name KST4Contest \
-            --input target/dist-libs \
-            --main-jar app.jar \
-            --main-class kst4contest.view.Kst4ContestApplication \
-            --module-path target/dist-libs \
-            --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.web,javafx.media,java.sql \
-            --dest dist
-          DEB="$(ls dist/*.deb | head -n 1)"
-          if [ -z "$DEB" ]; then
-            echo "No DEB produced by jpackage" && exit 1
-          fi
-          mv "$DEB" "dist/KST4Contest-${{ github.ref_name }}-debian-amd64.deb"
-
-      - name: Build Fedora package
-        run: |
-          jpackage \
-            --type rpm \
-            --name KST4Contest \
-            --input target/dist-libs \
-            --main-jar app.jar \
-            --main-class kst4contest.view.Kst4ContestApplication \
-            --module-path target/dist-libs \
-            --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.web,javafx.media,java.sql \
-            --dest dist
-          RPM="$(ls dist/*.rpm | head -n 1)"
-          if [ -z "$RPM" ]; then
-            echo "No RPM produced by jpackage" && exit 1
-          fi
-          mv "$RPM" "dist/KST4Contest-${{ github.ref_name }}-fedora-x86_64.rpm"
 
       - name: Create AppDir metadata
         run: |
@@ -168,6 +129,154 @@ jobs:
           chmod +x target/appimagetool.AppImage
           APPIMAGE_EXTRACT_AND_RUN=1 ARCH=x86_64 target/appimagetool.AppImage target/KST4Contest.AppDir dist/KST4Contest-${{ github.ref_name }}-linux-x86_64.AppImage
 
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: linux-appimage
+          path: dist/KST4Contest-${{ github.ref_name }}-linux-x86_64.AppImage
+
+  build-linux-deb:
+    name: Build Debian package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4.1.0
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install packaging dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fakeroot
+
+      - name: Ensure mvnw is executable
+        run: chmod +x mvnw
+
+      - name: Build JAR and copy runtime dependencies
+        run: |
+          ./mvnw -B -DskipTests package dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory=target/dist-libs
+          cp "$(ls -t target/praktiKST-*.jar | head -n 1)" target/dist-libs/app.jar
+
+      - name: Build Debian package
+        run: |
+          mkdir -p dist
+          jpackage \
+            --type deb \
+            --name KST4Contest \
+            --input target/dist-libs \
+            --main-jar app.jar \
+            --main-class kst4contest.view.Kst4ContestApplication \
+            --module-path target/dist-libs \
+            --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.web,javafx.media,java.sql \
+            --dest dist
+          DEB="$(ls dist/*.deb | head -n 1)"
+          if [ -z "$DEB" ]; then
+            echo "No DEB produced by jpackage" && exit 1
+          fi
+          mv "$DEB" "dist/KST4Contest-${{ github.ref_name }}-debian-amd64.deb"
+
+      - name: Upload Debian artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: linux-debian
+          path: dist/KST4Contest-${{ github.ref_name }}-debian-amd64.deb
+
+  build-linux-rpm:
+    name: Build Fedora package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4.1.0
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install packaging dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rpm rpm-build
+
+      - name: Ensure mvnw is executable
+        run: chmod +x mvnw
+
+      - name: Build JAR and copy runtime dependencies
+        run: |
+          ./mvnw -B -DskipTests package dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory=target/dist-libs
+          cp "$(ls -t target/praktiKST-*.jar | head -n 1)" target/dist-libs/app.jar
+
+      - name: Build Fedora package
+        run: |
+          mkdir -p dist
+          jpackage \
+            --type rpm \
+            --name KST4Contest \
+            --input target/dist-libs \
+            --main-jar app.jar \
+            --main-class kst4contest.view.Kst4ContestApplication \
+            --module-path target/dist-libs \
+            --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.web,javafx.media,java.sql \
+            --dest dist
+          RPM="$(ls dist/*.rpm | head -n 1)"
+          if [ -z "$RPM" ]; then
+            echo "No RPM produced by jpackage" && exit 1
+          fi
+          mv "$RPM" "dist/KST4Contest-${{ github.ref_name }}-fedora-x86_64.rpm"
+
+      - name: Upload Fedora artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: linux-fedora
+          path: dist/KST4Contest-${{ github.ref_name }}-fedora-x86_64.rpm
+
+  build-linux-arch:
+    name: Build Arch Linux package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4.1.0
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install packaging dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends zstd
+
+      - name: Ensure mvnw is executable
+        run: chmod +x mvnw
+
+      - name: Build JAR and copy runtime dependencies
+        run: |
+          ./mvnw -B -DskipTests package dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory=target/dist-libs
+          cp "$(ls -t target/praktiKST-*.jar | head -n 1)" target/dist-libs/app.jar
+
+      - name: Build app-image with jpackage
+        run: |
+          mkdir -p dist
+          jpackage \
+            --type app-image \
+            --name KST4Contest \
+            --input target/dist-libs \
+            --main-jar app.jar \
+            --main-class kst4contest.view.Kst4ContestApplication \
+            --module-path target/dist-libs \
+            --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.web,javafx.media,java.sql \
+            --dest dist
+
       - name: Build Arch Linux package artifact
         run: |
           ARCH=$(uname -m)
@@ -197,24 +306,6 @@ jobs:
           EOF
           tar --zstd -cf "dist/KST4Contest-${{ github.ref_name }}-archlinux-${ARCH}.pkg.tar.zst" -C "$PKGROOT" .
 
-      - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4.3.4
-        with:
-          name: linux-appimage
-          path: dist/KST4Contest-${{ github.ref_name }}-linux-x86_64.AppImage
-
-      - name: Upload Debian artifact
-        uses: actions/upload-artifact@v4.3.4
-        with:
-          name: linux-debian
-          path: dist/KST4Contest-${{ github.ref_name }}-debian-amd64.deb
-
-      - name: Upload Fedora artifact
-        uses: actions/upload-artifact@v4.3.4
-        with:
-          name: linux-fedora
-          path: dist/KST4Contest-${{ github.ref_name }}-fedora-x86_64.rpm
-
       - name: Upload Arch Linux artifact
         uses: actions/upload-artifact@v4.3.4
         with:
@@ -242,7 +333,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends flatpak flatpak-builder
-          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           flatpak --user install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
 
       - name: Build app-image with jpackage
@@ -349,7 +440,7 @@ jobs:
             --module-path target/dist-libs \
             --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.web,javafx.media,java.sql \
             --dest dist
-          
+
         env:
           MACOSX_DEPLOYMENT_TARGET: "13.0"
 
@@ -451,6 +542,9 @@ jobs:
     needs:
       - build-windows-zip
       - build-linux-appimage
+      - build-linux-deb
+      - build-linux-rpm
+      - build-linux-arch
       - build-macos-dmg
       - build-flatpak
       - build-docs-pdf
