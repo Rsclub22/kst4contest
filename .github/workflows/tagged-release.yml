@@ -383,6 +383,7 @@ jobs:
         run: |
           flatpak-builder --force-clean target/flatpak-build target/de.x08.KST4Contest.yml
           flatpak build-export target/flatpak-repo target/flatpak-build
+          flatpak build-update-repo target/flatpak-repo
           flatpak build-bundle target/flatpak-repo "dist/KST4Contest-${{ github.ref_name }}-linux-x86_64.flatpak" de.x08.KST4Contest
 
       - name: Upload Flatpak artifact
@@ -390,6 +391,12 @@ jobs:
         with:
           name: linux-flatpak
           path: dist/KST4Contest-${{ github.ref_name }}-linux-x86_64.flatpak
+
+      - name: Upload Flatpak OSTree repo
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: flatpak-ostree-repo
+          path: target/flatpak-repo/
 
   build-macos-dmg:
     name: Build macOS DMG (${{ matrix.os }})
@@ -524,6 +531,28 @@ jobs:
           name: docs-pdf
           path: dist/KST4Contest-${{ github.ref_name }}-manual-*.pdf
 
+  publish-flatpak-repo:
+    name: Publish Flatpak OSTree Repo to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build-flatpak
+
+    steps:
+      - name: Download OSTree repo artifact
+        uses: actions/download-artifact@v4.1.3
+        with:
+          name: flatpak-ostree-repo
+          path: flatpak-ostree-repo/
+
+      - name: Push to flatpak-repo branch
+        run: |
+          cd flatpak-ostree-repo
+          git init
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add -A
+          git commit -m "Flatpak repo: ${{ github.ref_name }}"
+          git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:flatpak-repo
+
   release-tag:
     name: Publish Tagged Release
     runs-on: ubuntu-latest
@@ -536,6 +565,7 @@ jobs:
       - build-macos-dmg
       - build-flatpak
       - build-docs-pdf
+      - publish-flatpak-repo
 
     steps:
       - name: Download Windows artifact
