@@ -383,7 +383,7 @@ jobs:
         run: |
           flatpak-builder --force-clean target/flatpak-build target/de.x08.KST4Contest.yml
           flatpak build-export target/flatpak-repo target/flatpak-build
-          flatpak build-bundle target/flatpak-repo "dist/KST4Contest-${{ github.ref_name }}-linux-x86_64.flatpak" de.x08.KST4Contest stable
+          flatpak build-bundle target/flatpak-repo "dist/KST4Contest-${{ github.ref_name }}-linux-x86_64.flatpak" de.x08.KST4Contest
           flatpak build-export --oci target/flatpak-oci target/flatpak-build
           tar -C target -czf "dist/KST4Contest-${{ github.ref_name }}-flatpak-oci.tar.gz" flatpak-oci
 
