@@ -54,7 +54,7 @@ Multiple package formats are available from the releases page:
 | Arch package | `KST4Contest-v<version>-archlinux-x86_64.pkg.tar.zst` | Arch Linux, Manjaro, … |
 | Flatpak | `de.x08.KST4Contest.flatpakref` | All distributions with Flatpak |
 
-The `.flatpakref` file automatically adds the signed repository and enables `flatpak update`.
+> **Recommended for Linux:** The Flatpak installation is the easiest way to stay up to date — `flatpak update` handles all future updates automatically. The repository is GPG-signed for security.
 
 ### macOS
 

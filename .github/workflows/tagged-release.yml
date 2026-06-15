@@ -388,7 +388,7 @@ jobs:
       - name: Build Flatpak repo
         run: |
           flatpak-builder --force-clean target/flatpak-build target/de.x08.KST4Contest.yml
-          flatpak build-export --gpg-sign="$FLATPAK_GPG_KEY_ID" target/flatpak-repo target/flatpak-build
+          flatpak build-export --gpg-sign="$FLATPAK_GPG_KEY_ID" target/flatpak-repo target/flatpak-build stable
           flatpak build-update-repo --gpg-sign="$FLATPAK_GPG_KEY_ID" target/flatpak-repo
 
       - name: Create flatpakref
