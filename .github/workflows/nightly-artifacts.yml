@@ -430,23 +430,11 @@ jobs:
                   path: flatpak-src/KST4Contest
           EOF
 
-      - name: Build Flatpak bundle and OCI export
+      - name: Build Flatpak bundle
         run: |
           flatpak-builder --force-clean target/flatpak-build target/de.x08.KST4Contest.yml
           flatpak build-export target/flatpak-repo target/flatpak-build
           flatpak build-bundle target/flatpak-repo "dist/${ASSET_BASENAME}-linux-x86_64.flatpak" de.x08.KST4Contest
-          flatpak build-export --oci target/flatpak-oci target/flatpak-build
-          tar -C target -czf "dist/${ASSET_BASENAME}-flatpak-oci.tar.gz" flatpak-oci
-
-      - name: Set up ORAS
-        uses: oras-project/setup-oras@v1
-
-      - name: Publish Flatpak OCI tarball to GitHub Packages
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | oras login ghcr.io -u "${{ github.actor }}" --password-stdin
-          oras push "ghcr.io/${{ github.repository_owner }}/kst4contest-flatpak:nightly-${SHORT_SHA}" \
-            --artifact-type application/vnd.flatpak.repo.v1+tar+gzip \
-            "dist/${ASSET_BASENAME}-flatpak-oci.tar.gz:application/vnd.flatpak.repo.v1+tar+gzip"
 
       - name: Upload Flatpak artifact
         uses: actions/upload-artifact@v4.3.4
