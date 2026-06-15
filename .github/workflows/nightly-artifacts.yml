@@ -11,6 +11,10 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-windows-zip:
     name: Build Windows ZIP
@@ -93,6 +97,11 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Install Linux packaging dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rpm zstd
+
       - name: Ensure mvnw is executable
         run: chmod +x mvnw
 
@@ -113,6 +122,40 @@ jobs:
             --module-path target/dist-libs \
             --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.web,javafx.media,java.sql \
             --dest dist
+
+      - name: Build Debian package
+        run: |
+          jpackage \
+            --type deb \
+            --name KST4Contest \
+            --input target/dist-libs \
+            --main-jar app.jar \
+            --main-class kst4contest.view.Kst4ContestApplication \
+            --module-path target/dist-libs \
+            --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.web,javafx.media,java.sql \
+            --dest dist
+          DEB="$(ls dist/*.deb | head -n 1)"
+          if [ -z "$DEB" ]; then
+            echo "No DEB produced by jpackage" && exit 1
+          fi
+          mv "$DEB" "dist/${ASSET_BASENAME}-debian-amd64.deb"
+
+      - name: Build Fedora package
+        run: |
+          jpackage \
+            --type rpm \
+            --name KST4Contest \
+            --input target/dist-libs \
+            --main-jar app.jar \
+            --main-class kst4contest.view.Kst4ContestApplication \
+            --module-path target/dist-libs \
+            --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.web,javafx.media,java.sql \
+            --dest dist
+          RPM="$(ls dist/*.rpm | head -n 1)"
+          if [ -z "$RPM" ]; then
+            echo "No RPM produced by jpackage" && exit 1
+          fi
+          mv "$RPM" "dist/${ASSET_BASENAME}-fedora-x86_64.rpm"
 
       - name: Create AppDir metadata
         run: |
@@ -146,11 +189,161 @@ jobs:
           chmod +x target/appimagetool.AppImage
           APPIMAGE_EXTRACT_AND_RUN=1 ARCH=x86_64 target/appimagetool.AppImage target/KST4Contest.AppDir "dist/${ASSET_BASENAME}-linux-x86_64.AppImage"
 
+      - name: Build Arch Linux package artifact
+        run: |
+          ARCH=$(uname -m)
+          PKGVER=$(printf '%s' "${VERSION}-${SHORT_SHA}" | sed 's/[^[:alnum:].+_]/_/g')
+          PKGROOT="target/archpkg"
+          rm -rf "$PKGROOT"
+          mkdir -p "$PKGROOT/usr/lib/KST4Contest" "$PKGROOT/usr/bin"
+          cp -a dist/KST4Contest/. "$PKGROOT/usr/lib/KST4Contest/"
+          cat > "$PKGROOT/usr/bin/KST4Contest" << 'EOF'
+          #!/bin/sh
+          exec /usr/lib/KST4Contest/bin/KST4Contest "$@"
+          EOF
+          chmod 755 "$PKGROOT/usr/bin/KST4Contest"
+          INSTALLED_SIZE=$(du -sk "$PKGROOT" | cut -f1)
+          cat > "$PKGROOT/.PKGINFO" << EOF
+          pkgname = kst4contest
+          pkgbase = kst4contest
+          pkgver = ${PKGVER}-1
+          pkgdesc = KST4Contest amateur radio contest logger
+          url = https://github.com/${{ github.repository }}
+          builddate = $(date +%s)
+          packager = GitHub Actions
+          size = ${INSTALLED_SIZE}
+          arch = ${ARCH}
+          license = custom
+          depend = java-runtime
+          EOF
+          tar --zstd -cf "dist/${ASSET_BASENAME}-archlinux-${ARCH}.pkg.tar.zst" -C "$PKGROOT" .
+
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4.3.4
         with:
           name: linux-appimage
           path: dist/KST4Contest-*-linux-x86_64.AppImage
+          retention-days: 14
+
+      - name: Upload Debian artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: linux-debian
+          path: dist/KST4Contest-*-debian-amd64.deb
+          retention-days: 14
+
+      - name: Upload Fedora artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: linux-fedora
+          path: dist/KST4Contest-*-fedora-x86_64.rpm
+          retention-days: 14
+
+      - name: Upload Arch Linux artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: linux-arch
+          path: dist/KST4Contest-*-archlinux-*.pkg.tar.zst
+          retention-days: 14
+
+  build-flatpak:
+    name: Build Flatpak
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+
+      - name: Resolve nightly version info
+        run: |
+          VERSION=$(grep -m1 '<version>' pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/')
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "SHORT_SHA=$SHORT_SHA" >> "$GITHUB_ENV"
+          echo "ASSET_BASENAME=KST4Contest-${VERSION}-${SHORT_SHA}" >> "$GITHUB_ENV"
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4.1.0
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Ensure mvnw is executable
+        run: chmod +x mvnw
+
+      - name: Install Flatpak tooling
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends flatpak flatpak-builder
+          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak --user install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
+
+      - name: Build app-image with jpackage
+        run: |
+          ./mvnw -B -DskipTests package dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory=target/dist-libs
+          cp "$(ls -t target/praktiKST-*.jar | head -n 1)" target/dist-libs/app.jar
+          mkdir -p target/flatpak-src
+          jpackage \
+            --type app-image \
+            --name KST4Contest \
+            --input target/dist-libs \
+            --main-jar app.jar \
+            --main-class kst4contest.view.Kst4ContestApplication \
+            --module-path target/dist-libs \
+            --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.web,javafx.media,java.sql \
+            --dest target/flatpak-src
+
+      - name: Create Flatpak manifest
+        run: |
+          mkdir -p dist
+          cat > target/de.x08.KST4Contest.yml << 'EOF'
+          app-id: de.x08.KST4Contest
+          runtime: org.freedesktop.Platform
+          runtime-version: "24.08"
+          sdk: org.freedesktop.Sdk
+          command: KST4Contest
+          finish-args:
+            - --socket=wayland
+            - --socket=x11
+            - --share=network
+            - --share=ipc
+            - --device=dri
+          modules:
+            - name: kst4contest
+              buildsystem: simple
+              build-commands:
+                - install -d /app/lib/KST4Contest /app/bin
+                - cp -a KST4Contest/. /app/lib/KST4Contest/
+                - printf '#!/bin/sh\nexec /app/lib/KST4Contest/bin/KST4Contest "$@"\n' > /app/bin/KST4Contest
+                - chmod 755 /app/bin/KST4Contest
+              sources:
+                - type: dir
+                  path: target/flatpak-src/KST4Contest
+          EOF
+
+      - name: Build Flatpak bundle and OCI export
+        run: |
+          flatpak-builder --force-clean target/flatpak-build target/de.x08.KST4Contest.yml
+          flatpak build-export target/flatpak-repo target/flatpak-build
+          flatpak build-bundle target/flatpak-repo "dist/${ASSET_BASENAME}-linux-x86_64.flatpak" de.x08.KST4Contest stable
+          flatpak build-export --oci target/flatpak-oci target/flatpak-build
+          tar -C target -czf "dist/${ASSET_BASENAME}-flatpak-oci.tar.gz" flatpak-oci
+
+      - name: Set up ORAS
+        uses: oras-project/setup-oras@v1
+
+      - name: Publish Flatpak OCI tarball to GitHub Packages
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | oras login ghcr.io -u "${{ github.actor }}" --password-stdin
+          oras push "ghcr.io/${{ github.repository_owner }}/kst4contest-flatpak:nightly-${SHORT_SHA}" \
+            --artifact-type application/vnd.flatpak.repo.v1+tar+gzip \
+            "dist/${ASSET_BASENAME}-flatpak-oci.tar.gz:application/vnd.flatpak.repo.v1+tar+gzip"
+
+      - name: Upload Flatpak artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: linux-flatpak
+          path: dist/KST4Contest-*-linux-x86_64.flatpak
           retention-days: 14
 
   build-macos-dmg:
