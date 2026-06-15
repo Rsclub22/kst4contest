@@ -236,7 +236,7 @@ jobs:
       - name: Install packaging dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends rpm rpm-build
+          sudo apt-get install -y --no-install-recommends rpm
 
       - name: Ensure mvnw is executable
         run: chmod +x mvnw
@@ -427,7 +427,7 @@ jobs:
                 - chmod 755 /app/bin/KST4Contest
               sources:
                 - type: dir
-                  path: target/flatpak-src/KST4Contest
+                  path: flatpak-src/KST4Contest
           EOF
 
       - name: Build Flatpak bundle and OCI export
