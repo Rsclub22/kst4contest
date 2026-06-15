@@ -332,6 +332,20 @@ jobs:
           exec /usr/lib/KST4Contest/bin/KST4Contest "$@"
           EOF
           chmod 755 "$PKGROOT/usr/bin/KST4Contest"
+          mkdir -p "$PKGROOT/usr/share/applications" "$PKGROOT/usr/share/icons/hicolor/256x256/apps"
+          cat > "$PKGROOT/usr/share/applications/KST4Contest.desktop" << 'EOF'
+          [Desktop Entry]
+          Type=Application
+          Name=KST4Contest
+          Comment=ON4KST Chat Client for VHF/UHF contest operation
+          Exec=KST4Contest
+          Icon=KST4Contest
+          Categories=Network;HamRadio;
+          Terminal=false
+          EOF
+          if [ -f "$PKGROOT/usr/lib/KST4Contest/lib/KST4Contest.png" ]; then
+            cp "$PKGROOT/usr/lib/KST4Contest/lib/KST4Contest.png" "$PKGROOT/usr/share/icons/hicolor/256x256/apps/KST4Contest.png"
+          fi
           INSTALLED_SIZE=$(du -sk "$PKGROOT" | cut -f1)
           cat > "$PKGROOT/.PKGINFO" << EOF
           pkgname = kst4contest
@@ -421,10 +435,19 @@ jobs:
             - name: kst4contest
               buildsystem: simple
               build-commands:
-                - install -d /app/lib/KST4Contest /app/bin
+                - install -d /app/lib/KST4Contest /app/bin /app/share/applications
                 - cp -a . /app/lib/KST4Contest/
                 - printf '#!/bin/sh\nexec /app/lib/KST4Contest/bin/KST4Contest "$@"\n' > /app/bin/KST4Contest
                 - chmod 755 /app/bin/KST4Contest
+                - echo '[Desktop Entry]' > /app/share/applications/de.x08.KST4Contest.desktop
+                - echo 'Type=Application' >> /app/share/applications/de.x08.KST4Contest.desktop
+                - echo 'Name=KST4Contest' >> /app/share/applications/de.x08.KST4Contest.desktop
+                - echo 'Comment=ON4KST Chat Client for VHF/UHF contest operation' >> /app/share/applications/de.x08.KST4Contest.desktop
+                - echo 'Exec=KST4Contest' >> /app/share/applications/de.x08.KST4Contest.desktop
+                - echo 'Icon=de.x08.KST4Contest' >> /app/share/applications/de.x08.KST4Contest.desktop
+                - printf 'Categories=Network;HamRadio;\n' >> /app/share/applications/de.x08.KST4Contest.desktop
+                - echo 'Terminal=false' >> /app/share/applications/de.x08.KST4Contest.desktop
+                - test -f /app/lib/KST4Contest/lib/KST4Contest.png && install -Dm644 /app/lib/KST4Contest/lib/KST4Contest.png /app/share/icons/hicolor/256x256/apps/de.x08.KST4Contest.png || true
               sources:
                 - type: dir
                   path: flatpak-src/KST4Contest
