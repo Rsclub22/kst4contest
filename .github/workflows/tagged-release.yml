@@ -371,7 +371,7 @@ jobs:
               buildsystem: simple
               build-commands:
                 - install -d /app/lib/KST4Contest /app/bin
-                - cp -a KST4Contest/. /app/lib/KST4Contest/
+                - cp -a . /app/lib/KST4Contest/
                 - printf '#!/bin/sh\nexec /app/lib/KST4Contest/bin/KST4Contest "$@"\n' > /app/bin/KST4Contest
                 - chmod 755 /app/bin/KST4Contest
               sources:
